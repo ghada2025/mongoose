@@ -32,6 +32,60 @@ export async function getPerson(req,res){
     }
 }
 
+export async function getPersonById(req, res){
+    try{
+        const { id } = req.params
+        const person = await Person.findById(id)
+        res.json({
+            message: "Person find successfully",
+            data : person
+        })
+
+    } catch (err) {
+        console.log(err)
+        res.status(500).json( {message: "errror in getPersonById controller"})
+    }
+}
+
+export async function getOnePerson(req, res){
+    try{
+        const {favoriteFoods} = req.params
+        const person = await Person.findOne({favoriteFoods})
+        res.json({
+            message: "Person find successfully",
+            data : person
+        })
+
+    } catch (err) {
+        console.log(err)
+        res.status(500).json( {message: "errror in getOnePerson controller"})
+    }
+}
+
+export async function getPersonWithQuery(req, res) {
+    console.log("Requête query params : ", req.query);
+
+    try {
+        const { favoriteFoods } = req.query;
+        if (!favoriteFoods) {
+            return res.status(400).json({ message: "Le paramètre favoriteFoods est requis." });
+        }
+        const person = await Person.find({ favoriteFoods })
+            .sort({ name: 1 })
+            .limit(2)
+            .select('-age');
+        if (!person || person.length === 0) {
+            return res.status(404).json({ message: "Aucune personne trouvée avec ce critère." });
+        }
+
+        res.json({ message: "Personnes trouvées avec succès", data: person });
+    } catch (err) {
+        console.error("Erreur : ", err);
+        res.status(500).json({ message: "Erreur dans getPersonWithQuery", error: err.message });
+    }
+}
+
+
 export async function updatePerson (req, res){
     try{
         const { id } = req.params
@@ -48,6 +102,21 @@ export async function updatePerson (req, res){
     } catch (err) {
         console.log(err)
         res.status(500).json({message: "errror in updatePerson controller"})
+    }
+}
+
+export async function updateOnePerson (req, res){
+    try {
+        const { name } = req.params
+        const { age } = req.body
+        const updateOnePerson = await Person.findOneAndUpdate({ name }, { age })
+        res.json({
+            message: "Person updated successfully",
+            data : updateOnePerson
+        })
+    } catch (err) {
+        console.log(err)
+        res.status(500).json({message: "errror in updateOnePerson controller"})
     }
 }
 
